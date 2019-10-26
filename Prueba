@@ -1,0 +1,1065 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct avion{
+	
+	int id , cantidad_Max , pasajerosAbordo;
+	char nombre[20];
+	char piloto[20];
+	struct Avion* sig;
+	
+}a;
+
+struct pasajero{
+	
+	int id , id_avion , edad;
+	char nombre[20];
+	struct Pasajero* sig;
+	
+}p;
+
+typedef struct avion Avion;
+typedef Avion* Lista_Aviones;
+
+typedef struct pasajero Pasajero;
+typedef Pasajero* Lista_Pasajeros;
+
+// Funciones de menu
+
+void menu();
+void menuAviones();
+void menuPasajeros();
+void buscarPasajeros(Lista_Pasajeros LP , Lista_Aviones LA , int id_avion);
+void vuelosNoLlenos(Lista_Aviones LA);
+void vuelosLlenos(Lista_Aviones LA);
+
+// Funciones para aviones
+
+void altaAviones(Lista_Aviones *LA , int id , char nombre[20] , char piloto[20] , int cantidad_Max);
+void mostrarAvionID(Lista_Aviones LA , int id);
+void mostrarAviones(Lista_Aviones LA);
+int  validacionID_Aviones(Lista_Aviones LA , int id);
+void bajaAviones(Lista_Aviones *LA , int id);
+void modificarAviones(Lista_Aviones *LA, int id , int op);
+
+// Funciones para pasajeros
+
+void mostrarPasajeros(Lista_Pasajeros LP);
+int  validacionID_Pasajeros(Lista_Pasajeros LP , int id);
+void altaPasajeros(Lista_Pasajeros *LP , int id , char nombre[20] , int edad, int id_avion);
+void comprarBoleto(Lista_Pasajeros *LP , Lista_Aviones *LA , int id , int id_avion);
+void cancelarBoleto(Lista_Pasajeros *LP , Lista_Aviones *LA , int id , int id_avion);
+int  buscarPasajeroID(Lista_Pasajeros LP , int id);
+void bajaPasajeros(Lista_Pasajeros *LP , int id);
+void mostrarPasajeroID(Lista_Pasajeros LP , int id);
+void modificarPasajeros(Lista_Pasajeros *LP , int id , int op);
+void disminuirUnAsiento(Lista_Aviones *LA , Lista_Aviones *LP , int id);
+
+Lista_Aviones   LA = NULL;
+Lista_Pasajeros LP = NULL;
+	
+int main(){
+	
+	int op;
+
+	
+	do{
+		
+		menu();
+		
+		printf("\n\n Ingrese << 1 >> para regresar al menu : ");
+		scanf("%d", & op);
+		
+	} while( op == 1 );
+	
+	return 0;
+}
+
+void menu(){
+	
+	int n = 0 , v = 0;
+	
+	/* MENU PRINCIPAL */
+	
+	do{
+		
+		system("cls");
+		puts("");
+		printf(" * MENU PRINCIPAL *\n\n");
+		printf(" Eliga la opcion con la que quiere trabajar : \n\n");
+		printf( " 1) Aviones\n"
+				" 2) Pasajeros\n"
+				" 3) Mostrar Aviones\n"
+				" 4) Mostrar Pasajeros\n"
+				" 5) Buscar Pasajeros\n"
+				" 6) Vuelos\n"
+				" 7) Vuelos Llenos\n"
+				" 8) Salir");
+		printf("\n\n  > ");
+		
+		fflush(stdin);
+		scanf("%d", & n );
+		
+	} while(n < 1 || n > 7);
+	
+	switch(n){
+		
+		case 1 :
+			
+			menuAviones();
+			break;
+			
+		case 2 :
+			
+			menuPasajeros();
+			break;
+			
+		case 3 :
+			
+			mostrarAviones(LA);
+			break;
+		case 4 :
+			
+			mostrarPasajeros(LP);
+			 break;
+			 
+		case 5 :
+			
+			system("cls");
+			puts("");
+			printf(" * Busqueda de Pasajeros mediante el vuelo *\n");
+			
+			printf("\n Ingrese el ID del avion : ");
+			scanf("%d", & a.id);
+			
+			v = validacionID_Aviones(LA , a.id);
+			
+			if(v == 1){
+				
+				buscarPasajeros(LP , LA , a.id);
+			} else {
+				
+				printf("\n\a El ID que ingresaste no existe \n");
+			}
+			
+			break;
+			
+		case 6 : 
+			system("cls");
+			puts("");
+			printf(" * Vuelos sin llenar *\n");
+			
+			vuelosNoLlenos(LA);
+			
+			break;
+			
+		case 7 : 
+			system("cls");
+			puts("");
+			printf(" * Vuelos llenos * \n");
+			
+			vuelosLlenos(LA);
+			
+			break;
+		
+		case 8 :
+			exit(0);
+			
+			break;
+	}
+}
+
+void menuAviones(){
+	
+	int n = 0 , v = 0 , op = 0;
+	
+	/* MENU AVIONES */
+	
+	do{
+		
+		system("cls");
+		puts("");
+		printf(" * MENU DE AVIONES *\n\n");
+		printf(" Eliga la opcion con la que quiere trabajar : \n\n");
+		printf( " 1) Alta\n"
+				" 2) Baja\n"
+				" 3) Modificar\n"
+				" 4) Volver");
+		printf("\n\n  > ");
+		
+		fflush(stdin);
+		scanf("%d", & n );
+		
+	} while(n < 1 || n > 4);
+	
+	switch(n){
+		
+		case 1 :
+			// ALTA DE AVIONES
+			puts("");
+			printf(" * Alta de Aviones *\n");
+			
+			do{
+				
+				printf("\n Ingrese el ID del avion : ");
+				scanf("%d", & a.id); fflush(stdin);
+			
+				v = validacionID_Aviones(LA , a.id);
+				
+				if(v == 1)
+					printf("\a\n\n ID repetido intentelo de nuevo");
+				
+			} while(v == 1);
+			
+			
+			printf("\n Ingrese el nombre del avion : ");
+			scanf("%s", & a.nombre); fflush(stdin);
+			
+			printf("\n Ingrese el nombre del piloto : ");
+			scanf("%s", & a.piloto); fflush(stdin);
+			
+			printf("\n Ingrese la cantidad maxima de pasajeros : ");
+			scanf("%d", & a.cantidad_Max); fflush(stdin);
+			
+			altaAviones(&LA , a.id , a.nombre , a.piloto , a.cantidad_Max);
+			 
+			break;
+			
+		case 2 :
+			
+			// BAJA DE AVIONES
+			puts("");
+			printf(" * Baja de Aviones *\n");
+			
+			printf("\n Ingrese el ID del avion que desea dar de baja : ");
+			scanf("%d", & a.id); fflush(stdin);
+			
+			v = validacionID_Aviones(LA , a.id);
+			
+			if(v == 0){
+				printf("\nEl ID que ingreso no se encuentra en la lista \n");
+				break;
+			}
+				
+			bajaAviones(&LA , a.id);
+			
+			break;
+		case 3 :
+			
+			// MODIFICAR DE AVIONES
+			puts("");
+			printf(" * Modificar Aviones *\n");
+			
+			printf("\n Ingrese el ID del avion que desea modificar : ");
+			scanf("%d", & a.id); fflush(stdin);
+			
+			v = validacionID_Aviones(LA , a.id);
+			
+			if(v == 0){
+				printf("\n El ID que ingreso no se encuentra en la lista \n");
+				break;
+			}
+			
+			do{
+				system("cls");
+				puts("");
+				printf(" * Modificar Aviones *\n");
+				
+				mostrarAvionID(LA , a.id);
+				
+				printf("\n Ingrese el numero que desea modificar : ");
+				scanf("%d", & op); fflush(stdin);
+				
+				if(op == 5)
+					return;
+					
+			} while (op < 1 || op > 4);
+			
+			modificarAviones(&LA , a.id , op);
+			
+			break;
+		case 4 : menu();
+		break;
+	}
+}
+
+void menuPasajeros(){
+	
+	int n = 0 , v = 0 , op = 0 , opcion = 0 , validacion = 0;
+	
+	/* MENU PASAJEROS */
+	
+	do{
+		
+		system("cls");
+		puts("");
+		printf(" * MENU DE PASAJEROS *\n\n");
+		printf(" Eliga la opcion con la que quiere trabajar : \n\n");
+		printf( " 1) Alta\n"
+				" 2) Comprar Boleto\n"
+				" 3) Baja\n"
+				" 4) Cancelar Boleto\n"
+				" 5) Modificar\n"
+				" 6) Volver");
+		printf("\n\n  > ");
+		
+		fflush(stdin);
+		scanf("%d", & n );
+		
+	} while(n < 1 || n > 6);
+	
+	switch(n){
+		
+		case 1:
+			
+			// ALTA DE PASAJEROS
+			puts("");
+			printf(" * Alta de Pasajeros *\n");
+			
+			do{
+				
+				printf("\n Ingrese el ID del pasajero : ");
+				scanf("%d", & p.id); fflush(stdin);
+			
+				v = validacionID_Pasajeros(LP , p.id);
+				
+				if(v == 1)
+					printf("\a\n ID repetido intentelo de nuevo\n");
+				
+			} while(v == 1);
+			
+			printf("\n Ingrese su nombre : ");
+			scanf("%s", & p.nombre); fflush(stdin);
+			
+			printf("\n Ingrese su edad : ");
+			scanf("%d", & p.edad); fflush(stdin);
+			
+			do{
+				
+				printf("\n Ingrese << 1 >> para subir a un vuelo o << 0 >> para subir mas tarde : ");
+				scanf("%d", & opcion); fflush(stdin);
+				
+			}while(opcion != 1 && opcion != 0);
+			
+			if(opcion == 0){
+				
+				p.id_avion = 0;
+			} else if(opcion == 1){
+				
+				do{
+					printf("\n Ingrese el ID del avion que tomara : ");
+					scanf("%d", & p.id_avion); fflush(stdin);
+					
+					
+					validacion = validacionID_Aviones(LA , p.id_avion);
+					
+					if(validacion == 0){
+						
+						printf("\a\n El ID del avion no existe\n");
+					}
+					
+				} while (validacion == 0);
+				
+				
+			}
+			
+			altaPasajeros(&LP , p.id , p.nombre , p.edad , p.id_avion);
+			comprarBoleto(&LP , &LA , p.id , p.id_avion);
+			
+			
+			break;
+			
+		case 2 :
+			
+			// COMPRAR BOLETOS
+			puts("");
+			printf(" * Comprar Boleto *\n");
+			
+			do{
+				
+				printf("\n Ingrese el ID del pasajero : ");
+				scanf("%d", & p.id);
+				
+				v = validacionID_Pasajeros(LP , p.id);
+				
+				if(v == 0){
+					
+					printf("\a\n El ID del pasajero no esta registrado\n\n");
+					system("pause");
+					return;
+				}
+				
+			} while(v == 0);
+			
+			if(buscarPasajeroID(LP , p.id) == 1){
+				
+				printf("\n\a El pasajero ya tiene asignado un vuelo\n");
+				system("pause");
+				return;
+			}
+			
+			do{
+				
+				printf("\n Ingrese el ID del avion que tomara : ");
+				scanf("%d", & p.id_avion); fflush(stdin);
+				
+				
+				validacion = validacionID_Aviones(LA , p.id_avion);
+				
+				if(validacion == 0){
+					
+					printf("\a\n El ID del avion no existe\n\n");
+					system("pause");
+					return;
+				}
+				
+			} while (validacion == 0);
+			
+			comprarBoleto(&LP , &LA , p.id , p.id_avion);
+			
+			break;
+		case 3 :
+			// BAJA TOTAL
+			puts("");
+			printf(" * Baja de Pasajeros *\n");
+			
+			printf("\n Ingrese el ID del pasajero que desea dar de baja : ");
+			scanf("%d", & p.id); fflush(stdin);
+			
+			v = validacionID_Pasajeros(LP , p.id);
+			
+			if(v = 0){
+				
+				printf("\n El ID que ingreso no se encuentra en la lista \n");
+				break;
+			}
+			
+			disminuirUnAsiento(&LA , &LP , p.id);
+			bajaPasajeros(&LP , p.id);
+			
+		 	break;
+		case 4 :
+			// CANCELAR BOLETO
+			puts("");
+			printf(" * Cancelar Boleto *\n");
+			
+			printf("\n Ingrese el ID del pasajero que quiere cancelar su boleto : ");
+			scanf("%d", & p.id);
+			
+			v = validacionID_Pasajeros(LP , p.id);
+			
+			if( v == 0){
+				
+				printf("\n El ID que ingreso no existe \n");
+				return;
+			}
+			
+			printf("\n Ingrese el ID del vuelo : ");
+			scanf("%d", & p.id_avion);
+			
+			validacion = validacionID_Aviones(LA , p.id_avion);
+			
+			if(validacion == 0){
+				
+				printf("\n El ID que ingreso no existe \n");
+				return;
+				
+			}
+			
+			cancelarBoleto(&LP , &LA , p.id , p.id_avion);
+			
+			break;
+		case 5 :
+			
+			// MODIFICAR PASAJEROS
+			puts("");
+			printf(" * Modificar Pasajeros *\n");
+			
+			printf("\n Ingrese el ID del avion que desea modificar : ");
+			scanf("%d", & p.id); fflush(stdin);
+			
+			v = validacionID_Pasajeros(LP , p.id);
+			
+			if(v == 0){
+				printf("\n El ID que ingreso no se encuentra en la lista \n");
+				break;
+				
+			}
+			
+			do{
+				system("cls");
+				puts("");
+				printf(" * Modificar pasajeros * \n");
+				
+				mostrarPasajeroID(LP , p.id);
+				
+				printf("\n Ingrese el numero que desea modificar : ");
+				scanf("%d", & op); fflush(stdin);
+				
+				if(op == 4)
+					return;
+				
+			} while(op < 1 || op > 4);
+			
+			modificarPasajeros(&LP , p.id , op);
+			
+			break;
+		case 6 : menu();
+		break;
+	}
+}
+
+void mostrarAvionID(Lista_Aviones LA , int id){
+	
+	while(LA != NULL){
+		
+		if(LA->id == id){
+			
+			printf("\n 1) ID     : %d", LA->id);
+			printf("\n 2) Nombre : %s", &LA->nombre);
+			printf("\n 3) Piloto : %s", &LA->piloto);
+			printf("\n 4) Cupo   : %d", LA->cantidad_Max);
+			printf("\n 5) Salir");
+			puts("");
+			
+		}
+		
+		LA =LA->sig;
+	}
+	
+	
+}
+
+void mostrarAviones(Lista_Aviones LA){
+	
+	int i;
+	
+	printf("\n Lista de Aviones : \n");
+	
+	while(LA != NULL){
+		
+		printf("\n ID     : %d", LA->id);
+		printf("\n Nombre : %s", &LA->nombre);
+		printf("\n Piloto : %s", &LA->piloto);
+		printf("\n Cupo   : %d", LA->cantidad_Max);
+		
+		i++;
+		LA = LA->sig;
+		puts("");
+	}
+}
+
+void altaAviones(Lista_Aviones *LA , int id , char nombre[20] , char piloto[20] , int cantidad_Max){
+	
+	Avion* nuevo = (Avion*) malloc(sizeof(Avion));
+
+	nuevo->id = id;
+	strcpy(nuevo->nombre , nombre);
+	strcpy(nuevo->piloto, piloto);
+	nuevo->cantidad_Max = cantidad_Max;
+	nuevo->pasajerosAbordo = 0;
+	nuevo->sig = NULL;
+	
+	if(*LA == NULL){
+		
+		*LA = nuevo;
+		
+	} else{
+		
+		nuevo->sig = *LA;
+		*LA = nuevo;
+		
+	}
+	
+	
+}
+
+void bajaAviones(Lista_Aviones *LA , int id){
+
+	Lista_Aviones aux = *LA;
+	Lista_Aviones previo = NULL;
+	
+	if(aux->sig == NULL){
+		
+		*LA = NULL;
+	}
+	
+	if(*LA != NULL){
+		
+		
+		if(aux->id == id){
+			
+			*LA =aux->sig;
+			
+			free(aux);
+			
+		} else{
+			
+			while(aux->id != id && aux->sig != NULL){
+				
+				previo = aux;
+				aux = aux->sig;
+			}
+			
+			if(aux->id == id){
+			
+				previo->sig = aux->sig;
+				
+				free(aux);
+			}
+				
+		}
+	}
+}
+
+int validacionID_Aviones(Lista_Aviones LA , int id){
+	
+	/* Funcion que te regresa un 1 si el id que buscas se encuentra en la lista y 0 si no lo encuentra en la lista*/
+	
+	while( LA != NULL){
+		if(LA->id == id)
+			return 1;
+			
+		LA = LA->sig;
+	}
+	
+	return 0;
+}
+
+void modificarAviones(Lista_Aviones *LA, int id , int op){
+	
+	Lista_Aviones aux = *LA;
+	
+	int v, newId , newCantidad;
+	char newNombre[20] , newPiloto[20];
+	
+	while(aux != NULL){
+		
+		if(aux->id == id){
+			
+			switch(op){
+				
+				case 1 : 
+					
+					do{
+				
+						printf("\n Ingrese el ID del avion : ");
+						fflush(stdin);
+						scanf("%d", & newId);
+					
+						v = validacionID_Aviones(LA , newId);
+						
+						if(v == 1)
+							printf("\a\n\n ID repetido intentelo de nuevo");
+						
+					} while(v == 1);
+					
+					aux->id = newId;
+					
+					break;
+					
+				case 2 :
+					
+					
+					printf("\n Ingrese el nuevo nombre del avion : ");
+					fflush(stdin);
+					scanf("%s", & newNombre);
+					
+					strcpy(aux->nombre , newNombre);
+					
+					break;
+					
+				case 3 :
+					
+					printf("\n Ingrese el nuevo nombre del piloto : ");
+					fflush(stdin);
+					scanf("%s", & newPiloto);
+					
+					strcpy(aux->piloto , newPiloto);
+					
+					break;
+					
+				case 4 :
+					
+					printf("\n Ingrese la nueva cantidad de personas : ");
+					fflush(stdin);
+					scanf("%d", & newCantidad);
+					
+					aux->cantidad_Max = newCantidad;
+					
+					break;
+					
+			}
+		}
+		
+		aux = aux->sig;
+	}
+}
+
+void mostrarPasajeros(Lista_Pasajeros LP){
+	
+	
+	printf("\n Lista de Pasajeros : \n");
+	
+	while(LP != NULL){
+		
+		printf("\n ID         : %d", LP->id);
+		printf("\n Nombre     : %s", LP->nombre);
+		printf("\n Edad       : %d", LP->edad);
+		printf("\n ID Avion   : %d", LP->id_avion);
+		
+		LP = LP->sig;
+		puts("");
+	}
+}
+
+int validacionID_Pasajeros(Lista_Pasajeros LP , int id){
+	
+	/* Funcion que te regresa un 1 si el id que buscas se encuentra en la lista y 0 si no lo encuentra en la lista*/
+	
+	while( LP != NULL){
+		
+		if(LP->id == id)
+			return 1;
+			
+		LP = LP->sig;
+	}
+	
+	return 0;
+}
+
+void altaPasajeros(Lista_Pasajeros *LP, int id , char nombre[20] , int edad, int id_avion){
+	
+	Pasajero* nuevo = (Pasajero*) malloc(sizeof(Pasajero));
+	
+	nuevo->id = id;
+	strcpy(nuevo->nombre , nombre);
+	nuevo->edad = edad;
+	nuevo->id_avion = id_avion;
+	nuevo->sig = NULL;
+	
+	if(*LP == NULL){
+		
+		*LP = nuevo;
+		
+	} else{
+		
+		nuevo->sig = *LP;
+		*LP = nuevo;
+		
+	}
+	
+}
+
+void comprarBoleto(Lista_Pasajeros *LP , Lista_Aviones *LA , int id , int id_avion){
+	
+	Lista_Pasajeros aux = *LP;
+	Lista_Aviones auxA = *LA;
+	
+	while(aux != NULL){
+		
+		if(aux->id == id){
+			
+			aux->id_avion = id_avion;
+			
+			while(auxA != NULL){
+				
+				if(auxA->id == id_avion){
+					
+					if(auxA->pasajerosAbordo < auxA->cantidad_Max){
+						
+						auxA->pasajerosAbordo += 1;	
+					} else{
+						
+						aux->id_avion = 0;
+						printf("\n\a El vuelo esta lleno guarde la calma e intentelo mas tarde \n");
+						
+					}
+				}
+				auxA = auxA->sig;
+			}
+		}
+		
+		aux = aux->sig;
+	}
+}
+
+void cancelarBoleto(Lista_Pasajeros *LP , Lista_Aviones *LA , int id , int id_avion){
+	
+	Lista_Pasajeros aux = *LP;
+	Lista_Aviones auxA = *LA;
+	
+	while(aux != NULL){
+		
+		if(aux->id == id){
+			
+			while(auxA != NULL){
+				
+				if(auxA->id == id_avion){
+					
+					if(aux->id_avion == id_avion){
+						
+						auxA->pasajerosAbordo -= 1;
+						aux->id_avion = 0;
+						
+					} else{
+						
+						printf("\n\a El ID del pasajero no concuerda con el vuelo" );
+						
+						
+					}
+					
+				}
+				
+				auxA = auxA->sig;
+			}
+			
+			
+		}
+		
+		aux = aux->sig;
+	}
+	
+	
+}
+
+int buscarPasajeroID(Lista_Pasajeros LP , int id){
+	
+	while(LP != NULL){
+		
+		if(LP->id == id){
+			if(LP->id_avion != 0){
+				
+				return 1;
+				
+			} else
+				return 0;
+		}
+		
+		LP = LP->sig;
+	}
+	
+	
+}
+
+void bajaPasajeros(Lista_Pasajeros *LP , int id){
+	
+	Lista_Pasajeros aux = *LP;
+	Lista_Pasajeros previo = NULL;
+	
+	if(aux->sig == NULL){
+		
+		*LP = NULL;
+	}
+	
+	if(*LP != NULL){
+		
+		if(aux->id = id){
+			
+			*LP = aux->sig;
+			
+			free(aux);
+			
+		} else {
+			
+			while(aux->id != id && aux->sig != NULL){
+				
+				previo = aux;
+				aux = aux->sig;
+				
+			}
+			
+			if(aux->id == id){
+				
+				previo->sig = aux->sig;
+				
+				free(aux);
+			}	
+		}
+	}
+}
+
+void mostrarPasajeroID(Lista_Pasajeros LP , int id){
+	
+	while(LP != NULL){
+		
+		if(LP->id == id){
+			
+			printf("\n 1) ID : %d", LP->id);
+			printf("\n 2) Nombre : %s", LP->nombre);
+			printf("\n 3) Edad : %d", LP->edad);
+			printf("\n 4) Salir");
+			puts("");
+		}
+		
+		LP = LP->sig;
+		
+	}
+	
+}
+
+void modificarPasajeros(Lista_Pasajeros *LP , int id , int op){
+	
+	Lista_Pasajeros aux = *LP;
+	
+	int v , newId , newEdad;
+	char newNombre[20];
+	
+	while(aux != NULL){
+		
+		if(aux->id == id){
+			
+			switch(op){
+				
+				case 1 :
+					
+					do{
+						
+						printf("\n Ingrese el ID del Pasajero : ");
+						fflush(stdin);
+						scanf("%d", & newId);
+						
+						v = validacionID_Pasajeros(LP , newId);
+						
+						if(v == 1)
+							printf("\a\n\n ID repetido intentelo de nuevo");						
+					
+					} while(v == 1);
+					
+					aux->id = newId;
+										
+					break;
+					
+				case 2 : 
+					
+					printf("\n Ingrese el nuevo nombre del Pasajero: ");
+					fflush(stdin);
+					scanf("%s", & newNombre);
+					
+					strcpy(aux->nombre , newNombre);
+					
+					break;
+					
+				case 3 :
+					
+					printf("\n Ingrese la nueva edad : ");
+					fflush(stdin);
+					scanf("%d", & newEdad);
+					
+					aux->edad = newEdad;
+					
+					break;
+		 	}
+		}
+		
+		aux = aux->sig;
+		
+	}
+	
+	
+}
+
+void buscarPasajeros(Lista_Pasajeros LP , Lista_Aviones LA , int id_avion){
+	
+	printf("\n Avion : \n");
+	
+	while(LA != NULL){
+		
+		if(LA->id == id_avion){
+			
+			printf("\n ID     : %d", LA->id);
+			printf("\n Nombre : %s", LA->nombre);
+			printf("\n Piloto : %s", LA->piloto);
+			printf("\n Cupo   : %d / %d", LA->pasajerosAbordo , LA->cantidad_Max);
+			puts("");
+		}
+		
+		LA = LA->sig;
+	}
+	
+	printf("\n Pasajeros : \n");
+	
+	while(LP != NULL){
+		
+		if(LP->id_avion == id_avion){
+			
+			printf("\n ID         : %d", LP->id);
+			printf("\n Nombre     : %s", LP->nombre);
+			printf("\n Edad       : %d", LP->edad);
+			printf("\n ID Avion   : %d", LP->id_avion);
+			puts("");
+		}
+		
+		LP = LP->sig;
+	}
+	
+}
+
+void vuelosNoLlenos(Lista_Aviones LA){
+	
+	while(LA != NULL){
+		
+		if(LA->pasajerosAbordo != LA->cantidad_Max){
+			
+			printf("\n ID     : %d", LA->id);
+			printf("\n Nombre : %s", LA->nombre);
+			printf("\n Piloto : %s", LA->piloto);
+			printf("\n Cupo   : %d / %d", LA->pasajerosAbordo , LA->cantidad_Max);
+			puts("");
+		}
+		
+		LA = LA->sig;
+	}
+	
+}
+
+void vuelosLlenos(Lista_Aviones LA){
+	
+	while(LA != NULL){
+		
+		if(LA->pasajerosAbordo == LA->cantidad_Max){
+			
+			printf("\n ID     : %d", LA->id);
+			printf("\n Nombre : %s", LA->nombre);
+			printf("\n Piloto : %s", LA->piloto);
+			printf("\n Cupo   : %d / %d", LA->pasajerosAbordo , LA->cantidad_Max);
+			puts("");
+			
+			
+		}
+		
+		LA = LA->sig;
+		
+	}
+	
+	
+}
+
+void disminuirUnAsiento(Lista_Aviones *LA , Lista_Aviones *LP , int id){
+	
+	Lista_Pasajeros aux = *LP;
+	Lista_Aviones auxA = *LA;
+	
+	while(aux != NULL){
+		
+		if(aux->id == id){
+			
+			while(auxA != NULL){
+				
+				if(auxA->id == aux->id_avion){
+					
+						auxA->pasajerosAbordo -= 1;
+						
+						
+						
+				}
+				auxA = auxA->sig;
+			}
+		}
+			
+		aux = aux->sig;
+	}
+		
+	
+}
